@@ -1,0 +1,52 @@
+# Instructions for ocean-only MOM6:
+
+# Compile the shared directories first:
+mkdir -p build/intel/shared/repro/
+(cd build/intel/shared/repro/; rm -f path_names; \
+../../../bin/list_paths ../../../../src/FMS; \
+mv path_names path_names.orig; egrep -v "coupler" path_names.orig > path_names; \
+../../../bin/mkmf -t ../../../site/ncrc/intel.mk -p libfms.a -c "-Duse_libMPI -Duse_netCDF -DSPMD" path_names)
+
+# Build the fms library:
+(cd build/intel/shared/repro/; source ../../env; make NETCDF=4 REPRO=1 libfms.a)
+
+# Setup a compilation directory: 
+mkdir -p build/intel/ocean_only/repro/
+(cd build/intel/ocean_only/repro/; rm -f path_names; \
+../../../bin/list_paths ./ ../../../../src/MOM6/{config_src/dynamic,config_src/solo_driver,src/{*,*/*}}/; \
+../../../bin/mkmf -t ../../../site/ncrc/intel.mk -o '-I../../shared/repro' -p 'MOM6 -L../../shared/repro -lfms' -c "-Duse_libMPI -Duse_netCDF -DSPMD" path_names)
+
+# Compile the model-specific source code:
+(cd build/intel/ocean_only/repro/; source ../../env; make NETCDF=4 REPRO=1 MOM6)
+
+# A successful compilation will yield the file build/intel/ocean_only/repro/MOM6.
+
+#===============================================================================================================
+
+# Instructions for ice_ocean_SIS MOM6:
+# Setup a compilation directory: 
+mkdir -p build/intel/ice_ocean_SIS/repro/
+(cd build/intel/ice_ocean_SIS/repro/; rm -f path_names; \
+../../../bin/list_paths ./ ../../../../src/MOM6/{config_src/dynamic,config_src/coupled_driver,src/{*,*/*}}/; \
+../../../bin/mkmf -t ../../../site/ncrc/intel.mk -o '-I../../shared/repro' -p 'MOM6 -L../../shared/repro -lfms' -c "-Duse_libMPI -Duse_netCDF -DSPMD" path_names)
+
+# Compile the model-specific source code:
+(cd build/intel/ice_ocean_SIS/repro/; source ../../env; make NETCDF=4 REPRO=1 MOM6)
+
+# Suggested by Matt Harrison for coupled MOM6/SIS configuration:
+mkdir -p build/ocean_SIS.intel.repro/
+(cd build/ocean_SIS.intel.repro/; rm -f path_names; \
+../../bin/list_paths ../../MOM6/{config_src/dynamic,config_src/coupled_driver,src/*,src/*/*}/ ../../shared/ ../../extras/{atmos_null,coupler,ice_param,land_null,SIS}/; \
+../../bin/mkmf -t ../../site/ncrc/intel.mk -p MOM6 -c "-Duse_libMPI -Duse_netCDF -DSPMD" path_names; \
+ln -sf ../shared.intel.repro/*.{o,mod} .)
+(cd build/ocean_SIS.intel.repro/; source ../../build/env/intel; make NETCDF=4 REPRO=1 -j)
+
+# Modified for the wiki directory format:
+mkdir -p build/intel/ice_ocean_SIS/repro/
+(cd build/intel/ice_ocean_SIS/repro/; rm -f path_names; \
+../../../bin/list_paths ../../../../src/MOM6/{config_src/dynamic,config_src/coupled_driver,src/{*,*/*}}/ ../../shared/repro/ ../../../../extras/{atmos_null,atmos_param/diag_integral,atmos_param/monin_obukhov,coupler,ice_param,land_null,SIS}/ ../../../../src/coupler/; \
+../../../bin/mkmf -t ../../../site/ncrc/intel.mk -o '-I../../../../src/FMS/include/' -p MOM6 -c "-Duse_libMPI -Duse_netCDF -DSPMD" path_names; \
+ln -sf ../../shared/repro/*.{o,mod} .)
+#STEVE: manually add to: build/intel/ice_ocean_SIS/repro/Makefile
+#STEVE: LDFLAGS = -L../../shared/repro -lfms
+(cd build/intel/ice_ocean_SIS/repro/; source ../../env; make NETCDF=4 REPRO=1 -j)

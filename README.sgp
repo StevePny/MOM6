@@ -1,0 +1,5 @@
+History:
+git clone https://github.com/StevePny/MOM6.git
+git remote add upstream https://github.com/NOAA-GFDL/MOM6.git
+git remote -v
+
