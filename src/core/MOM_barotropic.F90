@@ -3751,7 +3751,7 @@ subroutine barotropic_init(u, v, h, eta, Time, G, param_file, diag, CS, &
   call get_param(param_file, mod, "BT_USE_VISC_REM_U_UH0", CS%visc_rem_u_uh0, &
                  "If true, use the viscous remnants when estimating the \n"//&
                  "barotropic velocities that were used to calculate uh0 \n"//&
-                 "and vh0.  False is probably the better choice.", default=.true.)
+                 "and vh0.  False is probably the better choice.", default=.false.)
   call get_param(param_file, mod, "BT_USE_WIDE_HALOS", CS%use_wide_halos, &
                  "If true, use wide halos and march in during the \n"//&
                  "barotropic time stepping for efficiency.", default=.true., &
@@ -3868,7 +3868,7 @@ subroutine barotropic_init(u, v, h, eta, Time, G, param_file, diag, CS, &
                  "effects of strong bottom drag, by making it implicit \n"//&
                  "with the barotropic time-step instead of implicit with \n"//&
                  "the baroclinic time-step and dividing by the number of \n"//&
-                 "barotropic steps.", default=.true.)
+                 "barotropic steps.", default=.false.)
 
   call get_param(param_file, mod, "CLIP_BT_VELOCITY", CS%clip_velocity, &
                  "If true, limit any velocity components that exceed \n"//&
